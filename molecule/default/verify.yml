@@ -1,0 +1,7 @@
+---
+# Don't forget to keep this file updated
+# molecule/<scenario>/verify.yml
+- name: "Verify"
+  hosts: "all"
+  gather_facts: false
+  tasks:
