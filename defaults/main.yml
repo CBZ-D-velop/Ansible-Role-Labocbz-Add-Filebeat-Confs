@@ -1,1 +1,31 @@
 ---
+add_filebeat_confs_path: "/etc/filebeat/conf.d"
+add_filebeat_confs_group: "filebeat"
+
+add_filebeat_confs_ignore_older: "24h"
+add_filebeat_confs_close_inactive: "24h"
+
+add_filebeat_confs_inputs:
+  - name: "host-mesages"
+    type: "filestream" # much better than log, see documentation
+    fields:
+      type: "UNIX"
+      file: "host-messages"
+    paths:
+      - "/var/log/messages"
+  #
+  - name: "host-auth"
+    type: "filestream"
+    fields:
+      type: "UNIX"
+      file: "host-auth"
+    paths:
+      - "/var/log/auth.log"
+  #
+  - name: "host-syslog"
+    type: "filestream"
+    fields:
+      type: "UNIX"
+      file: "host-syslog"
+    paths:
+      - "/var/log/syslog"

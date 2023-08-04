@@ -10,9 +10,19 @@
 
 ## Description
 
-![Tag: UNIX](https://img.shields.io/badge/Tech-UNIX-orange)
+![Tag: Ansible](https://img.shields.io/badge/Tech-Ansible-orange)
+![Tag: Debian](https://img.shields.io/badge/Tech-Debian-orange)
+![Tag: Filebeat](https://img.shields.io/badge/Tech-Filebeat-orange)
 
-This is a limited description for the meta.
+An Ansible role import / build a Filebeat configuration logfile.
+
+The provided Ansible role serves the purpose of seamlessly integrating additional log harvesting functionality into an existing Filebeat setup. Filebeat, which should already be present, acts as a log shipper, forwarding log data to various outputs. This role streamlines the process of extending Filebeat's capabilities by creating a .yml configuration file within a designated Filebeat configuration directory.
+
+The primary objective of this role is to enable the effortless addition of a new log harvester to Filebeat during the deployment of a specific service. This can be likened to a "hot-swappable" feature, where a new harvester can be dynamically introduced to Filebeat without disrupting its ongoing operations.
+
+It's important to note that this role assumes that Filebeat is already up and running. The configuration settings for the associated Logstash setup are not automatically incorporated through this role; rather, it focuses solely on the Filebeat aspect. The role achieves its purpose by defining a set of input configurations within the provided YAML file. These configurations specify the type of log data to harvest, such as system logs, authentication logs, and messages, and map them to the appropriate file paths.
+
+In essence, this Ansible role enhances operational flexibility by enabling on-the-fly expansion of Filebeat's log harvesting capabilities. By encapsulating the process of configuring additional harvesters, it simplifies and accelerates the deployment of new services while ensuring smooth data transmission from the service's log files to the designated Logstash instance.
 
 ## Folder structure
 
@@ -109,13 +119,74 @@ In order to surchage vars, you have multiples possibilities but for mains cases 
 ```YAML
 # From inventory
 ---
-all vars from to put/from your inventory
+add_filebeat_confs_path: "/etc/filebeat/conf.d"
+add_filebeat_confs_group: "filebeat"
+
+add_filebeat_confs_ignore_older: "24h"
+add_filebeat_confs_close_inactive: "24h"
+
+add_filebeat_confs_inputs:
+  - name: "host-mesages"
+    type: "filestream" # much better than log, see documentation
+    fields:
+      type: "UNIX"
+      file: "host-messages"
+    paths:
+      - "/var/log/messages"
+  #
+  - name: "host-auth"
+    type: "filestream"
+    fields:
+      type: "UNIX"
+      file: "host-auth"
+    paths:
+      - "/var/log/auth.log"
+  #
+  - name: "host-syslog"
+    type: "filestream"
+    fields:
+      type: "UNIX"
+      file: "host-syslog"
+    paths:
+      - "/var/log/syslog"
+
 ```
 
 ```YAML
 # From AWX / Tower
 ---
-all vars from to put/from AWX / Tower
+
+inv_add_filebeat_confs_path: "/etc/filebeat/conf.d"
+inv_add_filebeat_confs_group: "filebeat"
+
+inv_add_filebeat_confs_ignore_older: "24h"
+inv_add_filebeat_confs_close_inactive: "24h"
+
+inv_add_filebeat_confs_inputs:
+  - name: "host-mesages"
+    type: "filestream" # much better than log, see documentation
+    fields:
+      type: "UNIX"
+      file: "host-messages"
+    paths:
+      - "/var/log/messages"
+  #
+  - name: "host-auth"
+    type: "filestream"
+    fields:
+      type: "UNIX"
+      file: "host-auth"
+    paths:
+      - "/var/log/auth.log"
+  #
+  - name: "host-syslog"
+    type: "filestream"
+    fields:
+      type: "UNIX"
+      file: "host-syslog"
+    paths:
+      - "/var/log/syslog"
+
 ```
 
 ### Run
@@ -123,8 +194,17 @@ all vars from to put/from AWX / Tower
 To run this role, you can copy the molecule/default/converge.yml playbook and add it into your playbook:
 
 ```YAML
----
-your converge.yml file here
+- name: "Include labocbz.add_filebeat_confs"
+    tags:
+    - "labocbz.add_filebeat_confs"
+    vars:
+    add_filebeat_confs_path: "{{ inv_add_filebeat_confs_path }}"
+    add_filebeat_confs_group: "{{ inv_add_filebeat_confs_group }}"
+    add_filebeat_confs_ignore_older: "{{ inv_add_filebeat_confs_ignore_older }}"
+    add_filebeat_confs_close_inactive: "{{ inv_add_filebeat_confs_close_inactive }}"
+    add_filebeat_confs_inputs: "{{ inv_add_filebeat_confs_inputs }}"
+    ansible.builtin.include_role:
+    name: "labocbz.add_filebeat_confs"
 ```
 
 ## Architectural Decisions Records

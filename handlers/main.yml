@@ -1,1 +1,9 @@
 ---
+
+- name: "Restart Filebeat"
+  register: install_filebeat_service_status
+  changed_when: install_filebeat_service_status.state != "restarted"
+  ansible.builtin.service:
+    name: "filebeat"
+    state: "restarted"
+    daemon_reload: true

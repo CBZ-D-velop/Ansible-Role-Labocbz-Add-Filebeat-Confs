@@ -1,1 +1,13 @@
 ---
+- name: "Import Filebeat configurations file"
+  notify: "Restart Filebeat"
+  loop: "{{ add_filebeat_confs_inputs }}"
+  loop_control:
+    loop_var: input
+  ansible.builtin.template:
+    src: "templates/input.yml.j2"
+    dest: "{{ add_filebeat_confs_path }}/{{ input.name | replace(' ', '-') }}.yml"
+    mode: "0700"
+    group: "{{ add_filebeat_confs_group }}"
+    owner: "root"
+    lstrip_blocks: yes

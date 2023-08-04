@@ -2,3 +2,11 @@
 - name: "labocbz.prepare_host"
   src: "https://github.com/CBZ-D-velop/Ansible-Role-Labocbz-Prepare-Host.git"
   version: "1.0"
+
+- name: "labocbz.add_certificates"
+  src: "https://github.com/CBZ-D-velop/Ansible-Role-Labocbz-Add-Certificates.git"
+  version: "2.0"
+
+- name: "labocbz.install_filebeat"
+  src: "https://github.com/CBZ-D-velop/Ansible-Role-Labocbz-Install-Filebeat.git"
+  version: "1.0"
