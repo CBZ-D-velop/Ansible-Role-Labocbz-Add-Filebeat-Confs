@@ -5,7 +5,7 @@
 ![Testing Method](https://img.shields.io/badge/Testing%20Method-Ansible%20Molecule-blueviolet)
 ![Testing Driver](https://img.shields.io/badge/Testing%20Driver-docker-blueviolet)
 ![Language Status](https://img.shields.io/badge/language-Ansible-red)
-![Compagny](https://img.shields.io/badge/Compagny-CBZ--Dvelop%2FLabo--CBZ-blue)
+![Compagny](https://img.shields.io/badge/Compagny-Labo--CBZ-blue)
 ![Author](https://img.shields.io/badge/Author-Lord%20Robin%20Crombez-blue)
 
 ## Description

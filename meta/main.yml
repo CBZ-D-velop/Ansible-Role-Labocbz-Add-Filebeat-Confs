@@ -3,7 +3,7 @@ galaxy_info:
   namespace: "labocbz"
   role_name: "add_filebeat_confs"
   description: "This is a limited description for the meta."
-  company: "CBZ-Dvelop/Labo-CBZ"
+  company: "Labo-CBZ"
 
   # If the issue tracker for your role is not on github, uncomment the
   # next line and provide a value
