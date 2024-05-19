@@ -7,144 +7,148 @@
 # See https://docs.gitlab.com/ee/ci/variables/#cicd-variable-precedence
 
 stages:
-- gitlab-test
-- yaml-lint
-- jinja2-lint
-- ansible-lint
-- molecule-test
-
-variables:
-  PIPELINE_SCENARIO_NAME: "cicd-debian-11"
+  - gitlab-test
+  - lint
+  - sonarqube-check
+  - molecule
 
 ###############################################################################
 #################### actions
 ###############################################################################
 
-# To start, we need to lint role's files with a YML vision
-# Because if one of the files doesn't respect YML conventions,
-# we dont need to test rest of the pipeline
-.yaml_lint: &yaml_lint
-  stage: yaml-lint
-  image: $NEXUS_ADDRESS/$DOCKER_IMAGE_YAML_LINT
-  before_script:
-    # Fix weird ansible bug: https://github.com/trailofbits/algo/issues/1637
-    # This probably happens due to gitlab-runner mounting the git repo into the container
-    - "chmod o-w ."
-  script:
-    - yamllint -c ./.yamllint $path # Here mains files
-  allow_failure: false
-  retry: 2
+variables:
+  ANSIBLE_FORCE_COLOR: "true"
+  PY_COLORS: "1"
+  #
+  SONAR_HOST_URL: "$SONARQUBE_ADDRESS"
+  SONAR_TOKEN: "$GITLAB_CI_SONARQUBE_USER_TOKEN"
+  #
+  DOCKER_IMAGE__ANALYSE_SONAR_SCANNER: "labocbz/analyse-sonar-scanner:latest"
+  DOCKER_IMAGE__LINT_SECRETS: "labocbz/lint-secrets:latest"
+  DOCKER_IMAGE__LINT_ANSIBLE: "labocbz/lint-ansible:latest"
+  DOCKER_IMAGE__LINT_YAML: "labocbz/lint-yaml:latest"
+  DOCKER_IMAGE__LINT_JINJA: "labocbz/lint-jinja:latest"
+  DOCKER_IMAGE__LINT_MARKDOWN: "labocbz/lint-markdown:latest"
+  DOCKER_IMAGE__RUN_ANSIBLE_MOLECULE: "labocbz/run-ansible-molecule:latest"
+  DOCKER_IMAGE__ANSIBLETEST_DEBIAN_11: "labocbz/ansibletest-debian-11:latest"
+  DOCKER_IMAGE__ANSIBLETEST_DEBIAN_12: "labocbz/ansibletest-debian-12:latest"
+  DOCKER_IMAGE__ANSIBLETEST_UBUNTU_22: "labocbz/ansibletest-ubuntu-22:latest"
+  DOCKER_IMAGE__ANSIBLETEST_DOCKER_DIND: "labocbz/ansibletest-docker-dind:latest"
 
-# Then we need to lint on role's files with a JINJA2 vision
-# Because if one of the templates files doesn't respect JINJA2 conventions,
-# we dont need to test rest of the pipeline
-.jinja2_lint: &jinja2_lint
-  stage: jinja2-lint
-  image: $NEXUS_ADDRESS/$DOCKER_IMAGE_JINJA_LINT
-  before_script:
-    # Fix weird ansible bug: https://github.com/trailofbits/algo/issues/1637
-    # This probably happens due to gitlab-runner mounting the git repo into the container
-    - "chmod o-w ."
-  script:
-    - "j2lint ./templates/*.j2 --ignore S3 S7"
-  allow_failure: false
-  retry: 2
-
-.ansible_lint: &ansible_lint
-  stage: ansible-lint
-  image: $NEXUS_ADDRESS/$DOCKER_IMAGE_ANSIBLE_LINT
-  before_script:
-    # Fix weird ansible bug: https://github.com/trailofbits/algo/issues/1637
-    # This probably happens due to gitlab-runner mounting the git repo into the container
-    - "chmod o-w ."
-  script:
-    - ansible-lint --config=./.ansible-lint --exclude molecule --exclude tests ./*
-  allow_failure: false
-  retry: 2
+###############################################################################
+#################### EXTENDABLES
+###############################################################################
 
 .molecule_test: &molecule_test
-  stage: molecule-test
-  image: $NEXUS_ADDRESS/$DOCKER_IMAGE_DOCKER_MOLECULE
-  variables:
-    PY_COLORS: '1'
-    ANSIBLE_FORCE_COLOR: '1'
+  image: $NEXUS_DOCKER_GROUP_REGISTRY/$DOCKER_IMAGE__RUN_ANSIBLE_MOLECULE
+  stage: molecule
   before_script:
-    - "docker login -u \"$NEXUS_REPOS_USERNAME\" -p \"$NEXUS_REPOS_PASSWORD\" http://$NEXUS_ADDRESS"
+    - "export DOCKER_CLIENT_TIMEOUT=180"
+    - "export COMPOSE_HTTP_TIMEOUT=180"
+    - "docker login -u \"$GITLAB_CI_NEXUS_CREDENTIALS_USR\" -p \"$GITLAB_CI_NEXUS_CREDENTIALS_PSW\" \"http://$NEXUS_DOCKER_GROUP_REGISTRY\""
     - "python3 -m compileall /usr/lib/python3 -qq"
     - "cp ./.ansible.cfg /root/.ansible.cfg"
-    # Fix weird ansible bug: https://github.com/trailofbits/algo/issues/1637
-    # This probably happens due to gitlab-runner mounting the git repo into the container
-    - "chmod o-w ."
-    - "[ -f \"./molecule/$PIPELINE_SCENARIO_NAME/requirements.yml\" ] && ansible-galaxy install -r ./molecule/$PIPELINE_SCENARIO_NAME/requirements.yml --roles-path=./molecule/$PIPELINE_SCENARIO_NAME/roles"
+
+    - "[ -f \"./molecule/$SCENARIO/requirements.yml\" ] && ansible-galaxy install -r ./molecule/$SCENARIO/requirements.yml --roles-path=./molecule/$SCENARIO/roles"
   script:
-    - "molecule test --scenario-name $PIPELINE_SCENARIO_NAME"
+    - "molecule test --scenario-name $SCENARIO"
   allow_failure: false
-  retry: 2
+  rules:
+    - if: '$CI_COMMIT_MESSAGE=~/^[^Merge]/ && $CI_COMMIT_BRANCH == "develop"'
+  needs:
+    - "lint:yaml"
+    - "lint:jinja"
+    - "lint:ansible"
+    - "lint:markdown"
 
 ###############################################################################
-#################### CI JOBS
+#################### CICD
 ###############################################################################
-
-############################################
-#### gitlab-test
-############################################
 
 # As a GitLab ci, we use the default template :)
 sast:
   stage: gitlab-test
 include:
-- template: Security/SAST.gitlab-ci.yml
+  - template: Security/SAST.gitlab-ci.yml
+
+lint:yaml:
+  stage: lint
+  image: $NEXUS_DOCKER_GROUP_REGISTRY/$DOCKER_IMAGE__LINT_YAML
+
+  script:
+    - yamllint --list-files ./
+    - yamllint -c ./.yamllint ./
   allow_failure: false
+  rules:
+    - if: '$CI_COMMIT_MESSAGE=~/^[^Merge]/ && $CI_COMMIT_BRANCH == "develop"'
 
-############################################
-#### yaml-lint
-############################################
+lint:jinja:
+  stage: lint
+  image: $NEXUS_DOCKER_GROUP_REGISTRY/$DOCKER_IMAGE__LINT_JINJA
 
-yaml_lint_role:
-  <<: *yaml_lint
-  variables:
-    path: "./*/*.yml"
+  script:
+    - "[ -n \"$(find ./templates -name '*.j2')\" ] && j2lint ./templates/*.j2 --ignore S3 S7"
+  allow_failure: false
+  rules:
+    - if: '$CI_COMMIT_MESSAGE=~/^[^Merge]/ && $CI_COMMIT_BRANCH == "develop"'
 
-yaml_lint_molecule:
-  <<: *yaml_lint
-  variables:
-    path: "./molecule/*/*.yml"
+lint:ansible:
+  stage: lint
+  image: $NEXUS_DOCKER_GROUP_REGISTRY/$DOCKER_IMAGE__LINT_ANSIBLE
 
-yaml_lint_inventories:
-  <<: *yaml_lint
-  variables:
-    path: "./tests/inventory/hosts.yml ./tests/inventory/*/*.yml"
+  script:
+    - ansible-lint --config=./.ansible-lint --exclude molecule --exclude tests ./*
+  allow_failure: false
+  rules:
+    - if: '$CI_COMMIT_MESSAGE=~/^[^Merge]/ && $CI_COMMIT_BRANCH == "develop"'
 
-yaml_lint_extra_vars:
-  <<: *yaml_lint
-  variables:
-    path: "./tests/certs/main.yml ./tests/tower/tower.yml"
+lint:markdown:
+  stage: lint
+  image: $NEXUS_DOCKER_GROUP_REGISTRY/$DOCKER_IMAGE__LINT_MARKDOWN
 
-#############################################
-##### jinja2-lint
-#############################################
+  script:
+    - markdownlint './README.md' --disable MD013
+  allow_failure: false
+  rules:
+    - if: '$CI_COMMIT_MESSAGE=~/^[^Merge]/ && $CI_COMMIT_BRANCH == "develop"'
 
-jinja2_lint_templates:
-  <<: *jinja2_lint
-
-############################################
-#### ansible-lint
-############################################
-
-ansible_lint:
-  <<: *ansible_lint
-  needs:
-    - "yaml_lint_role"
-    - "yaml_lint_molecule"
-    - "yaml_lint_inventories"
-    - "yaml_lint_extra_vars"
-    - "jinja2_lint_templates"
-
-############################################
-#### moelcule test
-############################################
-
-molecule_test:
+molecule:test-debian-12:
   <<: *molecule_test
-  needs:
-    - "ansible_lint"
+  variables:
+    SCENARIO: "cicd-debian-12"
+  rules:
+    - if: '$CI_COMMIT_MESSAGE=~/^[^Merge]/ && $CI_COMMIT_BRANCH == "develop"'
+
+molecule:test-ubuntu-22:
+  <<: *molecule_test
+  variables:
+    SCENARIO: "cicd-ubuntu-22"
+  allow_failure: true
+  rules:
+    - if: '$CI_COMMIT_MESSAGE=~/^[^Merge]/ && $CI_COMMIT_BRANCH == "develop"'
+
+molecule:test-debian-11:
+  <<: *molecule_test
+  variables:
+    SCENARIO: "cicd-debian-11"
+  allow_failure: true
+  rules:
+    - if: '$CI_COMMIT_MESSAGE=~/^[^Merge]/ && $CI_COMMIT_BRANCH == "develop"'
+
+sonarqube-check:
+  stage: sonarqube-check
+  image: 
+    name: $NEXUS_DOCKER_GROUP_REGISTRY/$DOCKER_IMAGE__ANALYSE_SONAR_SCANNER
+    entrypoint: [""]
+  variables:
+    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
+    GIT_DEPTH: "0"  # Tells git to fetch all the branches of the project, required by the analysis task
+  cache:
+    key: "${CI_JOB_NAME}"
+    paths:
+      - ".sonar/cache"
+  script: 
+    - "sonar-scanner"
+  rules:
+    - if: '$CI_COMMIT_MESSAGE=~/^[^Merge]/ && $CI_COMMIT_BRANCH == "develop"'
+    - if: '$CI_COMMIT_BRANCH == "main"'
