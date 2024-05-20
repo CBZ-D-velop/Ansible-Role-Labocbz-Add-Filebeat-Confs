@@ -1,5 +1,5 @@
 ---
-inv_prepare_host__users:
+inv_prepare_host__system_users:
   - login: "filebeat"
     group: "filebeat"
 
