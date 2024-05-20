@@ -2,16 +2,15 @@
 - name: "Converge"
   hosts: "cicd-ubuntu-22"
   tasks:
+    # replace these tasks with whatever you find suitable to test
+    - name: "Copy something to test use of synchronize module"
+      ansible.builtin.copy:
+        src: "/etc/hosts"
+        dest: "/tmp/hosts-from-controller"
+        mode: "0700"
 
-    - name: "Include labocbz.install_apacheds"
+    - name: "Include labocbz.add_filebeat_confs"
       tags:
-        - "labocbz.install_apacheds"
-      vars:
-        install_apacheds__version: "{{ inv_install_apacheds__version }}"
-        install_apacheds__user: "{{ inv_install_apacheds__user }}"
-        install_apacheds__group: "{{ inv_install_apacheds__group }}"
-        install_apacheds__install_dir: "{{ inv_install_apacheds__install_dir }}"
-        install_apacheds__path: "{{ inv_install_apacheds__path }}"
-        install_apacheds__instances: "{{ inv_install_apacheds__instances }}"
+        - "labocbz.add_filebeat_confs"
       ansible.builtin.include_role:
-        name: "labocbz.install_apacheds"
+        name: "labocbz.add_filebeat_confs"

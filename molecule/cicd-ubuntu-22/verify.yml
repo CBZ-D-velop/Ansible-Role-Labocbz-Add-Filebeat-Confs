@@ -6,40 +6,23 @@
   gather_facts: false
   tasks:
 
-    - name: "Get ApacheDS services current state"
-      register: install_apacheds__service_status
-      failed_when: not install_apacheds__service_status.status.ActiveState == 'active'
-      loop: "{{ inv_install_apacheds__instances }}"
-      loop_control:
-        loop_var: instance
+    - name: "Get Filebeat service current state"
+      register: install_filebeat_service_status
+      failed_when: not install_filebeat_service_status.status.ActiveState == 'active'
       ansible.builtin.systemd:
-        name: "apacheds_{{ instance.name }}"
+        name: "filebeat"
 
-    - name: "Check ApacheDS connectivities LDAP"
-      when: not (instance.ssl | default(false))
-      loop: "{{ inv_install_apacheds__instances }}"
-      loop_control:
-        loop_var: instance
-      ansible.builtin.wait_for:
-        host: "localhost"
-        port: "10389"
-        timeout: 120
+    - name: "Check Filebeat configurations folder"
+      register: file_stat
+      failed_when: not file_stat.stat.exists
+      ansible.builtin.stat:
+        path: "{{ inv_add_filebeat_confs_path }}"
 
-    - name: "Check ApacheDS connectivities LDAPS"
-      when: instance.ssl | default(false)
-      loop: "{{ inv_install_apacheds__instances }}"
+    - name: "Check Filebeat configurations input"
+      loop: "{{ inv_add_filebeat_confs_inputs }}"
       loop_control:
-        loop_var: instance
-      ansible.builtin.wait_for:
-        host: "localhost"
-        port: "10636"
-        timeout: 120
-
-    - name: "Get default admin informations from instances LDAP"
-      loop: "{{ inv_install_apacheds__instances }}"
-      loop_control:
-        loop_var: instance
-      register: admin_instance_result
-      failed_when: admin_instance_result.stdout == ""
-      changed_when: admin_instance_result.rc != 0
-      ansible.builtin.command: "ldapsearch -x -H ldap://localhost:10389 -D 'uid=admin,ou=system' -b 'dc=example,dc=com' -w '{{ instance.password }}'"
+        loop_var: input
+      register: file_stat
+      failed_when: not file_stat.stat.exists
+      ansible.builtin.stat:
+        path: "{{ inv_add_filebeat_confs_path }}/{{ input.name | replace(' ', '-') }}.yml"

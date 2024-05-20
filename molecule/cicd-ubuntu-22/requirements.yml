@@ -5,5 +5,5 @@
 - name: "labocbz.add_certificates"
   src: "https://github.com/CBZ-D-velop/Ansible-Role-Labocbz-Add-Certificates.git"
 
-- name: "labocbz.install_java"
-  src: "https://github.com/CBZ-D-velop/Ansible-Role-Labocbz-Install-Java.git"
+- name: "labocbz.install_filebeat"
+  src: "https://github.com/CBZ-D-velop/Ansible-Role-Labocbz-Install-Filebeat.git"

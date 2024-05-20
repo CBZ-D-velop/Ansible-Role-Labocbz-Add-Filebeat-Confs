@@ -1,6 +1,6 @@
 ---
 - name: "Converge"
-  hosts: "all"
+  hosts: "cicd-debian-11"
   tasks:
     # replace these tasks with whatever you find suitable to test
     - name: "Copy something to test use of synchronize module"
