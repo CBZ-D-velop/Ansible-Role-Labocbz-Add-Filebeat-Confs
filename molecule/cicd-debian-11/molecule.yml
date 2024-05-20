@@ -10,7 +10,7 @@ driver:
 platforms:
   - name: "molecule-cicd-debian-11-instance-1-add-filebeat-confs"
     image: "${NEXUS_DOCKER_GROUP_REGISTRY}/${DOCKER_IMAGE__ANSIBLETEST_DEBIAN_11}"
-    hostname: "molecule-cicd-debian-11-instance-1-install-apacheds"
+    hostname: "molecule-cicd-debian-11-instance-1-add-filebeat-confs"
     privileged: true
     pre_build_image: true
     command: "/sbin/init"
