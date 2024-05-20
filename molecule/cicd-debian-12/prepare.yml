@@ -1,0 +1,96 @@
+---
+# if you have any prepararion task
+- name: "Prepare"
+  hosts: "all"
+  gather_facts: true
+  tasks:
+
+    - name: "Include cryptographic content var file"
+      ansible.builtin.include_vars: "../../tests/certs/main.yml"
+
+    - name: "Include labocbz.prepare_host"
+      tags:
+        - "labocbz.prepare_host"
+      vars:
+        prepare_host_users: "{{ inv_prepare_host_users }}"
+      ansible.builtin.include_role:
+        name: "labocbz.prepare_host"
+
+    - name: "Gather facts from all hosts"
+      delegate_to: "{{ item }}"
+      delegate_facts: true
+      loop: "{{ groups['all'] }}"
+      ansible.builtin.setup:
+
+    - name: "Edit /etc/hosts file to add all hosts"
+      loop: "{{ groups['all'] }}"
+      loop_control:
+        loop_var: host
+      register: output
+      changed_when: output.rc != 0
+      ansible.builtin.shell: "echo \"{{ hostvars[host]['ansible_default_ipv4']['address'] }}  {{ host }} # from Molecule\" >> /etc/hosts"
+
+    - name: "Import cryptographic content if needed (cert)"
+      loop: "{{ inv_cert_bundles }}"
+      loop_control:
+        loop_var: bundle
+      when: inv_cert_bundles is defined and bundle.type == "cert"
+      ansible.builtin.copy:
+        src: "../../tests/certs/{{ bundle.name }}.zip"
+        dest: "/tmp/{{ bundle.name }}.zip"
+        owner: "root"
+        group: "root"
+        mode: "0700"
+
+    - name: "Import cryptographic content if needed (CA)"
+      loop: "{{ inv_cert_bundles }}"
+      loop_control:
+        loop_var: bundle
+      when: inv_cert_bundles is defined and bundle.type == "CA"
+      ansible.builtin.copy:
+        src: "../../tests/certs/{{ bundle.name }}"
+        dest: "/tmp/{{ bundle.name }}"
+        owner: "root"
+        group: "root"
+        mode: "0700"
+
+    - name: "Include labocbz.add_certificates"
+      tags:
+        - "labocbz.add_certificates"
+      loop: "{{ inv_cert_bundles }}"
+      loop_control:
+        loop_var: bundle
+      vars:
+        add_certificates_bundle_name: "{{ bundle.name }}"
+        add_certificates_bundle_type: "{{ bundle.type }}"
+        add_certificates_bundle_src: "{{ bundle.src }}"
+        add_certificates_bundle_dest: "{{ bundle.dest }}"
+        #add_certificates_bundle_src_user: "{{ bundle.src_user }}"
+        #add_certificates_bundle_src_password: "{{ bundle.src_password }}"
+        #add_certificates_bundle_dest_user: "{{ bundle.dest_user }}"
+        #add_certificates_bundle_dest_group: "{{ bundle.dest_group }}"
+        #add_certificates_bundle_dest_mode: "{{ bundle.dest_mode }}"
+      ansible.builtin.include_role:
+        name: "labocbz.add_certificates"
+
+    - name: "Include labocbz.install_filebeat"
+      tags:
+        - "labocbz.install_filebeat"
+      vars:
+        install_filebeat_major_version: "{{ inv_install_filebeat_major_version }}"
+        install_filebeat_config_path: "{{ inv_install_filebeat_config_path }}"
+        install_filebeat_confs_path: "{{ inv_install_filebeat_confs_path }}"
+        install_filebeat_ssl_authorities: "{{ inv_install_filebeat_ssl_authorities }}"
+        install_filebeat_ssl_path: "{{ inv_install_filebeat_ssl_path }}"
+        install_filebeat_logstash_ssl: "{{ inv_install_filebeat_logstash_ssl }}"
+        install_filebeat_logstash_hosts: "{{ inv_install_filebeat_logstash_hosts }}"
+        install_filebeat_logstash_client_auth: "{{ inv_install_filebeat_logstash_client_auth }}"
+        install_filebeat_group: "{{ inv_install_filebeat_group }}"
+        install_filebeat_ssl_crt: "{{ inv_install_filebeat_ssl_crt }}"
+        install_filebeat_ssl_key: "{{ inv_install_filebeat_ssl_key }}"
+        install_filebeat_confs_reload: "{{ inv_install_filebeat_confs_reload }}"
+        install_filebeat_workers: "{{ inv_install_filebeat_workers }}"
+        install_filebeat_loglevel: "{{ inv_install_filebeat_loglevel }}"
+        install_filebeat_log_keeping: "{{ inv_install_filebeat_log_keeping }}"
+      ansible.builtin.include_role:
+        name: "labocbz.install_filebeat"
