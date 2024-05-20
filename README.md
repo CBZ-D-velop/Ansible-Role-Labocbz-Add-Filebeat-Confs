@@ -197,11 +197,11 @@ To run this role, you can copy the molecule/default/converge.yml playbook and ad
     tags:
     - "labocbz.add_filebeat_confs"
     vars:
-    add_filebeat_confs_path: "{{ inv_add_filebeat_confs_path }}"
-    add_filebeat_confs_group: "{{ inv_add_filebeat_confs_group }}"
-    add_filebeat_confs_ignore_older: "{{ inv_add_filebeat_confs_ignore_older }}"
-    add_filebeat_confs_close_inactive: "{{ inv_add_filebeat_confs_close_inactive }}"
-    add_filebeat_confs_inputs: "{{ inv_add_filebeat_confs_inputs }}"
+      add_filebeat_confs_path: "{{ inv_add_filebeat_confs_path }}"
+      add_filebeat_confs_group: "{{ inv_add_filebeat_confs_group }}"
+      add_filebeat_confs_ignore_older: "{{ inv_add_filebeat_confs_ignore_older }}"
+      add_filebeat_confs_close_inactive: "{{ inv_add_filebeat_confs_close_inactive }}"
+      add_filebeat_confs_inputs: "{{ inv_add_filebeat_confs_inputs }}"
     ansible.builtin.include_role:
     name: "labocbz.add_filebeat_confs"
 ```
