@@ -1,11 +1,11 @@
 ---
-add_filebeat_confs_path: "/etc/filebeat/conf.d"
-add_filebeat_confs_group: "filebeat"
+add_filebeat_confs__path: "/etc/filebeat/conf.d"
+add_filebeat_confs__group: "filebeat"
 
-add_filebeat_confs_ignore_older: "24h"
-add_filebeat_confs_close_inactive: "24h"
+add_filebeat_confs__ignore_older: "24h"
+add_filebeat_confs__close_inactive: "24h"
 
-add_filebeat_confs_inputs:
+add_filebeat_confs__inputs:
   - name: "host-mesages"
     type: "filestream" # much better than log, see documentation
     fields:

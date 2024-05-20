@@ -118,13 +118,13 @@ In order to surchage vars, you have multiples possibilities but for mains cases 
 ```YAML
 # From inventory
 ---
-add_filebeat_confs_path: "/etc/filebeat/conf.d"
-add_filebeat_confs_group: "filebeat"
+add_filebeat_confs__path: "/etc/filebeat/conf.d"
+add_filebeat_confs__group: "filebeat"
 
-add_filebeat_confs_ignore_older: "24h"
-add_filebeat_confs_close_inactive: "24h"
+add_filebeat_confs__ignore_older: "24h"
+add_filebeat_confs__close_inactive: "24h"
 
-add_filebeat_confs_inputs:
+add_filebeat_confs__inputs:
   - name: "host-mesages"
     type: "filestream" # much better than log, see documentation
     fields:
@@ -155,13 +155,13 @@ add_filebeat_confs_inputs:
 # From AWX / Tower
 ---
 
-inv_add_filebeat_confs_path: "/etc/filebeat/conf.d"
-inv_add_filebeat_confs_group: "filebeat"
+inv_add_filebeat_confs__path: "/etc/filebeat/conf.d"
+inv_add_filebeat_confs__group: "filebeat"
 
-inv_add_filebeat_confs_ignore_older: "24h"
-inv_add_filebeat_confs_close_inactive: "24h"
+inv_add_filebeat_confs__ignore_older: "24h"
+inv_add_filebeat_confs__close_inactive: "24h"
 
-inv_add_filebeat_confs_inputs:
+inv_add_filebeat_confs__inputs:
   - name: "host-mesages"
     type: "filestream" # much better than log, see documentation
     fields:
@@ -197,11 +197,11 @@ To run this role, you can copy the molecule/default/converge.yml playbook and ad
     tags:
     - "labocbz.add_filebeat_confs"
     vars:
-      add_filebeat_confs_path: "{{ inv_add_filebeat_confs_path }}"
-      add_filebeat_confs_group: "{{ inv_add_filebeat_confs_group }}"
-      add_filebeat_confs_ignore_older: "{{ inv_add_filebeat_confs_ignore_older }}"
-      add_filebeat_confs_close_inactive: "{{ inv_add_filebeat_confs_close_inactive }}"
-      add_filebeat_confs_inputs: "{{ inv_add_filebeat_confs_inputs }}"
+      add_filebeat_confs__path: "{{ inv_add_filebeat_confs__path }}"
+      add_filebeat_confs__group: "{{ inv_add_filebeat_confs__group }}"
+      add_filebeat_confs__ignore_older: "{{ inv_add_filebeat_confs__ignore_older }}"
+      add_filebeat_confs__close_inactive: "{{ inv_add_filebeat_confs__close_inactive }}"
+      add_filebeat_confs__inputs: "{{ inv_add_filebeat_confs__inputs }}"
     ansible.builtin.include_role:
       name: "labocbz.add_filebeat_confs"
 ```

@@ -7,8 +7,8 @@
   tasks:
 
     - name: "Get Filebeat service current state"
-      register: install_filebeat_service_status
-      failed_when: not install_filebeat_service_status.status.ActiveState == 'active'
+      register: install_filebeat__service_status
+      failed_when: not install_filebeat__service_status.status.ActiveState == 'active'
       ansible.builtin.systemd:
         name: "filebeat"
 
@@ -16,13 +16,13 @@
       register: file_stat
       failed_when: not file_stat.stat.exists
       ansible.builtin.stat:
-        path: "{{ inv_add_filebeat_confs_path }}"
+        path: "{{ inv_add_filebeat_confs__path }}"
 
     - name: "Check Filebeat configurations input"
-      loop: "{{ inv_add_filebeat_confs_inputs }}"
+      loop: "{{ inv_add_filebeat_confs__inputs }}"
       loop_control:
         loop_var: input
       register: file_stat
       failed_when: not file_stat.stat.exists
       ansible.builtin.stat:
-        path: "{{ inv_add_filebeat_confs_path }}/{{ input.name | replace(' ', '-') }}.yml"
+        path: "{{ inv_add_filebeat_confs__path }}/{{ input.name | replace(' ', '-') }}.yml"
