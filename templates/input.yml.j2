@@ -12,8 +12,8 @@
 {% for field, value in input.fields.items() %}
   fields.{{ field }}: "{{ value }}"
 {% endfor %}
-  ignore_older: "{{ add_filebeat_confs_ignore_older }}"
-  close_inactive: "{{ add_filebeat_confs_close_inactive }}"
+  ignore_older: "{{ add_filebeat_confs__ignore_older }}"
+  close_inactive: "{{ add_filebeat_confs__close_inactive }}"
 {% if input.multiline_pattern | default(false) %}
   multiline.pattern: '{{ input.multiline_pattern.replace("\\\\", "\\") }}'
   multiline.negate: "true"

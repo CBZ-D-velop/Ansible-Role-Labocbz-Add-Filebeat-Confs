@@ -1,0 +1,21 @@
+---
+inv_install_filebeat__major_version: "8"
+
+inv_install_filebeat__config_path: "/etc/filebeat"
+inv_install_filebeat__confs_path: "{{ inv_install_filebeat__config_path }}/conf.d"
+
+inv_install_filebeat__ssl_authorities: "{{ inv_install_filebeat__ssl_path }}/my-filebeat-cluster.domain.tld/ca-chain.pem.crt"
+inv_install_filebeat__ssl_path: "{{ inv_install_filebeat__config_path }}/ssl"
+inv_install_filebeat__ssl_crt: "{{ inv_install_filebeat__ssl_path }}/my-filebeat-cluster.domain.tld/my-filebeat-cluster.domain.tld.pem.crt"
+inv_install_filebeat__ssl_key: "{{ inv_install_filebeat__ssl_path }}/my-filebeat-cluster.domain.tld/my-filebeat-cluster.domain.tld.pem.key"
+
+inv_install_filebeat__logstash_ssl: true
+inv_install_filebeat__logstash_hosts:
+  - "127.0.0.1:5054"
+inv_install_filebeat__logstash_client_auth: true
+inv_install_filebeat__confs_reload: "10s"
+inv_install_filebeat__loglevel: "debug"
+inv_install_filebeat__log_keeping: 31
+inv_install_filebeat__workers: 5
+
+inv_install_filebeat__group: "filebeat"

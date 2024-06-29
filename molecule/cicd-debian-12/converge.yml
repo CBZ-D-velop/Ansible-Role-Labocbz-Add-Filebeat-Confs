@@ -1,6 +1,6 @@
 ---
 - name: "Converge"
-  hosts: "all"
+  hosts: "cicd-debian-12"
   tasks:
     # replace these tasks with whatever you find suitable to test
     - name: "Copy something to test use of synchronize module"
@@ -12,11 +12,5 @@
     - name: "Include labocbz.add_filebeat_confs"
       tags:
         - "labocbz.add_filebeat_confs"
-      vars:
-        add_filebeat_confs__path: "{{ inv_add_filebeat_confs__path }}"
-        add_filebeat_confs__group: "{{ inv_add_filebeat_confs__group }}"
-        add_filebeat_confs__ignore_older: "{{ inv_add_filebeat_confs__ignore_older }}"
-        add_filebeat_confs__close_inactive: "{{ inv_add_filebeat_confs__close_inactive }}"
-        add_filebeat_confs__inputs: "{{ inv_add_filebeat_confs__inputs }}"
       ansible.builtin.include_role:
         name: "labocbz.add_filebeat_confs"
