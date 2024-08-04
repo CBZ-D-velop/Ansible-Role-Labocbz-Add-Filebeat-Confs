@@ -106,18 +106,6 @@ Some vars a required to run this role:
 
 ```YAML
 ---
-your defaults vars here
-```
-
-The best way is to modify these vars by copy the ./default/main.yml file into the ./vars and edit with your personnals requirements.
-
-You can set vars in the template model in Ansible AWX / Tower or just surchage them during the playbook call.
-
-In order to surchage vars, you have multiples possibilities but for mains cases you have to put vars in your inventory and/or on your AWX / Tower interface.
-
-```YAML
-# From inventory
----
 add_filebeat_confs__path: "/etc/filebeat/conf.d"
 add_filebeat_confs__group: "filebeat"
 
@@ -151,9 +139,18 @@ add_filebeat_confs__inputs:
 
 ```
 
+The best way is to modify these vars by copy the ./default/main.yml file into the ./vars and edit with your personnals requirements.
+
+You can set vars in the template model in Ansible AWX / Tower or just surchage them during the playbook call.
+
+In order to surchage vars, you have multiples possibilities but for mains cases you have to put vars in your inventory and/or on your AWX / Tower interface.
+
 ```YAML
-# From AWX / Tower
+# From inventory
 ---
+inv_prepare_host__system_users:
+  - login: "filebeat"
+    group: "filebeat"
 
 inv_add_filebeat_confs__path: "/etc/filebeat/conf.d"
 inv_add_filebeat_confs__group: "filebeat"
@@ -185,6 +182,12 @@ inv_add_filebeat_confs__inputs:
       file: "host-syslog"
     paths:
       - "/var/log/syslog"
+
+```
+
+```YAML
+# From AWX / Tower
+---
 
 ```
 
