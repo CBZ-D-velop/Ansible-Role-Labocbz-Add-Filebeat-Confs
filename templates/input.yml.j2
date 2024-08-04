@@ -5,6 +5,7 @@
 ##############################
 
 - type: "{{ input.type }}"
+  id: "{{ input.id }}"
   paths:
 {% for path in input.paths %}
   - "{{ path }}"
