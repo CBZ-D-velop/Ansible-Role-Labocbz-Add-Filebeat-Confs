@@ -114,6 +114,7 @@ add_filebeat_confs__close_inactive: "24h"
 
 add_filebeat_confs__inputs:
   - name: "host-mesages"
+    id: "id1"
     type: "filestream" # much better than log, see documentation
     fields:
       type: "UNIX"
@@ -122,6 +123,7 @@ add_filebeat_confs__inputs:
       - "/var/log/messages"
   #
   - name: "host-auth"
+    id: "id1"
     type: "filestream"
     fields:
       type: "UNIX"
@@ -130,6 +132,7 @@ add_filebeat_confs__inputs:
       - "/var/log/auth.log"
   #
   - name: "host-syslog"
+    id: "id1"
     type: "filestream"
     fields:
       type: "UNIX"
@@ -160,6 +163,7 @@ inv_add_filebeat_confs__close_inactive: "24h"
 
 inv_add_filebeat_confs__inputs:
   - name: "host-mesages"
+    id: "id1"
     type: "filestream" # much better than log, see documentation
     fields:
       type: "UNIX"
@@ -168,6 +172,7 @@ inv_add_filebeat_confs__inputs:
       - "/var/log/messages"
   #
   - name: "host-auth"
+    id: "id1"
     type: "filestream"
     fields:
       type: "UNIX"
@@ -176,6 +181,7 @@ inv_add_filebeat_confs__inputs:
       - "/var/log/auth.log"
   #
   - name: "host-syslog"
+    id: "id1"
     type: "filestream"
     fields:
       type: "UNIX"
